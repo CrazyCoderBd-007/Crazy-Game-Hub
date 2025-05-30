@@ -37,10 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             id: 4,
-            title: "Ping pong",
+            title: "subway-surfers",
             description: "A classic arcade game. Keep the ball in play.",
-            url: "https://www.google.com/search?q=play+ping+pong+online",
-            imageUrl: "images/placeholder.png"
+            url: "https://freeonlinegames.github.io/subway-surfers-tokyo/",
+            imageUrl: "https://imgur.com/a/x6hCqhh"
         }
     ];
 
