@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
             imageUrl: "images/placeholder.png"
         },
         {
-            id: 3,
+            id: 4,
             title: "Ping pong",
-            description: "ping pong game.",
+            description: "A classic arcade game. Keep the ball in play.",
             url: "https://www.google.com/search?q=play+ping+pong+online",
             imageUrl: "images/placeholder.png"
         }
