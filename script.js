@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 1,
             title: "Retro Ping Pong",
             description: "A classic arcade game. Keep the ball in play!",
-            url: "https://www.google.com/search?q=play+ping+pong+online", // Replace with actual game link
+            url:"https://poki.com/en/g/ping-pong-html5#fullscreen", // Replace with actual game link
             imageUrl: "images/placeholder.png" // Create this image or use a direct link
         },
         {
