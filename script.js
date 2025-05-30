@@ -34,6 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
             description: "Slide tiles to combine numbers and reach the 2048 tile.",
             url: "https://play2048.co/",
             imageUrl: "images/placeholder.png"
+        },
+        {
+            id: 3,
+            title: "Ping pong",
+            description: "ping pong game.",
+            url: "https://www.google.com/search?q=play+ping+pong+online",
+            imageUrl: "images/placeholder.png"
         }
     ];
 
