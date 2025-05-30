@@ -40,11 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
             title: "subway-surfers",
             description: "A classic arcade game. Keep the ball in play.",
             url: "https://freeonlinegames.github.io/subway-surfers-tokyo/",
-            imageUrl: "https://imgur.com/a/x6hCqhh"
+            imageUrl: "https://imgur.com/a/cioj4wJ"
         }
     ];
 
-    const defaultImageUrl = 'images/placeholder.png'; // Path to your placeholder
+    const defaultImageUrl = 'https://imgur.com/'; // Path to your placeholder
 
     // --- Render Games ---
     function renderGames() {
