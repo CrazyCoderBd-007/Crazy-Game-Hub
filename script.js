@@ -26,21 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
             title: "Snake Online",
             description: "Eat the dots, grow your snake, don't hit the walls or yourself.",
             url: "https://www.google.com/search?q=play+snake+online", // Replace with actual game link
-            imageUrl: "images/placeholder.png"
+            
         },
         {
             id: 3,
             title: "2048 Puzzle",
             description: "Slide tiles to combine numbers and reach the 2048 tile.",
             url: "https://play2048.co/",
-            imageUrl: "images/placeholder.png"
+            
         },
         {
             id: 4,
             title: "subway-surfers",
             description: "A classic arcade game. Keep the ball in play.",
             url: "https://freeonlinegames.github.io/subway-surfers-tokyo/",
-            imageUrl: "https://imgur.com/a/cioj4wJ"
+            
         }
     ];
 
