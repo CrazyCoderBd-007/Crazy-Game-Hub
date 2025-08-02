@@ -3,62 +3,513 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤪 Crazy Game Hub 🎮</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Car Racing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background: #000;
+            user-select: none;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            --road-width: min(80vw, 400px);
+        }
+
+        #roadCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: saturate(130%) brightness(110%) contrast(120%);
+            z-index: 1;
+        }
+
+        #roadCanvas::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.6));
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #gameObjectContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+        }
+
+        #playerCar {
+            position: absolute;
+            width: calc(var(--road-width) / 3.5);
+            height: auto;
+            bottom: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: transform 0.2s ease;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.8));
+            z-index: 4;
+        }
+
+        .obstacle {
+            position: absolute;
+            width: calc(var(--road-width) / 4.9);
+            height: auto;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.7));
+            z-index: 3;
+        }
+
+        .coin {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 4px 8px rgba(255,215,0,0.8));
+            z-index: 3;
+        }
+
+        #scoreBox {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            border: 2px solid rgba(255,255,255,0.3);
+            z-index: 5;
+        }
+
+        #leftBtn, #rightBtn {
+            position: absolute;
+            bottom: 30px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.9);
+            border: 3px solid #333;
+            border-radius: 50%;
+            font-size: 30px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        #leftBtn {
+            left: 30px;
+        }
+
+        #rightBtn {
+            right: 30px;
+        }
+
+        #leftBtn:active, #rightBtn:active {
+            transform: scale(0.9);
+            background: rgba(255,255,255,0.7);
+        }
+
+        #menuScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #menuScreen h1, #gameOverScreen h1 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+        }
+
+        #startBtn, #restartBtn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+            box-shadow: 0 8px 25px rgba(238, 90, 36, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        #startBtn:hover, #restartBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(238, 90, 36, 0.6);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #gameOverScreen p {
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            #scoreBox {
+                font-size: 16px;
+                padding: 8px 16px;
+            }
+            
+            #leftBtn, #rightBtn {
+                width: 70px;
+                height: 70px;
+                font-size: 25px;
+            }
+            
+            #menuScreen h1, #gameOverScreen h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🤪 Crazy Game Hub 🎮</h1>
-            <p>Your portal to a world of crazy fun games!</p>
-        </header>
-
-        <nav>
-            <button id="showAddGameModalBtn">Add New Game (Admin)</button>
-            <a href="https://github.com/CrazyCoderBd-007/Crazy-Game-Hub/issues/new?assignees=&labels=game-request&template=game-request.md&title=Game+Request%3A+[GAME+NAME]" target="_blank" class="button">Request a Game</a>
-        </nav>
-
-        <main>
-            <h2>Featured Games</h2>
-            <div id="game-list" class="game-grid">
-                <!-- Games will be dynamically inserted here by JavaScript -->
-            </div>
-        </main>
-
-        <footer>
-            <p>© <span id="currentYear"></span> Crazy Game Hub</p>
-            <p>Contact: <a href="mailto:khalidx007k@gmail.com">khalidx007k@gmail.com</a></p>
-            <p>Game Requests: <a href="https://github.com/CrazyCoderBd-007/Crazy-Game-Hub/issues" target="_blank">Submit on GitHub</a></p>
-        </footer>
-    </div>
-
-    <!-- Modal for Adding a New Game -->
-    <div id="addGameModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">×</span>
-            <h2>Add a New Game</h2>
-            <form id="addGameForm">
-                <div>
-                    <label for="gameTitle">Game Title:</label>
-                    <input type="text" id="gameTitle" required>
-                </div>
-                <div>
-                    <label for="gameDescription">Description:</label>
-                    <textarea id="gameDescription" rows="3" required></textarea>
-                </div>
-                <div>
-                    <label for="gameUrl">Game URL:</label>
-                    <input type="url" id="gameUrl" required placeholder="https://example.com/game">
-                </div>
-                <div>
-                    <label for="gameImageUrl">Image URL (optional):</label>
-                    <input type="url" id="gameImageUrl" placeholder="https://example.com/image.png">
-                </div>
-                <button type="submit">Add Game</button>
-            </form>
+    <div id="gameContainer">
+        <canvas id="roadCanvas"></canvas>
+        <div id="gameObjectContainer">
+            <img id="playerCar" src="https://buildwithmobile.lovestoblog.com/car/player_car.png" alt="Player Car">
+        </div>
+        <div id="scoreBox">Score: 0</div>
+        <button id="leftBtn">←</button>
+        <button id="rightBtn">→</button>
+        
+        <div id="menuScreen">
+            <h1>🏎️ Car Racing</h1>
+            <button id="startBtn">Let's Start</button>
+        </div>
+        
+        <div id="gameOverScreen" class="hidden">
+            <h1>Game Over!</h1>
+            <p id="finalScore">Final Score: 0</p>
+            <button id="restartBtn">Play Again</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        class CarRacingGame {
+            constructor() {
+                this.canvas = document.getElementById('roadCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gameContainer = document.getElementById('gameContainer');
+                this.gameObjectContainer = document.getElementById('gameObjectContainer');
+                this.playerCar = document.getElementById('playerCar');
+                this.scoreBox = document.getElementById('scoreBox');
+                this.menuScreen = document.getElementById('menuScreen');
+                this.gameOverScreen = document.getElementById('gameOverScreen');
+                
+                this.gameState = 'menu'; // menu, playing, gameOver
+                this.score = 0;
+                this.roadOffset = 0;
+                this.playerPosition = 0; // -1 (left), 0 (center), 1 (right)
+                this.gameObjects = [];
+                this.animationId = null;
+                this.lastSpawnTime = 0;
+                this.gameSpeed = 2;
+                
+                this.sounds = {};
+                this.roadImage = new Image();
+                
+                this.init();
+            }
+            
+            async init() {
+                this.setupCanvas();
+                this.setupEventListeners();
+                await this.loadAssets();
+                this.gameLoop();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                
+                window.addEventListener('resize', () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('restartBtn').addEventListener('click', () => this.restartGame());
+                document.getElementById('leftBtn').addEventListener('click', () => this.moveLeft());
+                document.getElementById('rightBtn').addEventListener('click', () => this.moveRight());
+                
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    if (this.gameState === 'playing') {
+                        if (e.key === 'ArrowLeft') this.moveLeft();
+                        if (e.key === 'ArrowRight') this.moveRight();
+                    }
+                });
+            }
+            
+            async loadAssets() {
+                // Load road image
+                this.roadImage.src = 'https://buildwithmobile.lovestoblog.com/car/road.jpg';
+                
+                // Load sounds
+                this.sounds.background = new Audio('https://buildwithmobile.lovestoblog.com/car/carsound.mp3');
+                this.sounds.crash = new Audio('https://buildwithmobile.lovestoblog.com/car/carhit.mp3');
+                this.sounds.coin = new Audio('https://buildwithmobile.lovestoblog.com/car/collect.wav');
+                
+                this.sounds.background.loop = true;
+                this.sounds.background.volume = 0.3;
+                
+                // Wait for road image to load
+                return new Promise(resolve => {
+                    this.roadImage.onload = resolve;
+                });
+            }
+            
+            startGame() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.playerPosition = 0;
+                this.gameObjects = [];
+                this.lastSpawnTime = 0;
+                this.gameSpeed = 2;
+                this.roadOffset = 0;
+                
+                this.menuScreen.classList.add('hidden');
+                this.gameOverScreen.classList.add('hidden');
+                this.updateScore();
+                this.updatePlayerPosition();
+                
+                // Start background music
+                this.sounds.background.currentTime = 0;
+                this.sounds.background.play().catch(e => console.log('Audio play failed:', e));
+            }
+            
+            restartGame() {
+                this.startGame();
+            }
+            
+            moveLeft() {
+                if (this.gameState === 'playing' && this.playerPosition > -1) {
+                    this.playerPosition--;
+                    this.updatePlayerPosition();
+                }
+            }
+            
+            moveRight() {
+                if (this.gameState === 'playing' && this.playerPosition < 1) {
+                    this.playerPosition++;
+                    this.updatePlayerPosition();
+                }
+            }
+            
+            updatePlayerPosition() {
+                const roadWidth = Math.min(window.innerWidth * 0.8, 400);
+                const laneWidth = roadWidth / 3;
+                const centerX = window.innerWidth / 2;
+                const targetX = centerX + (this.playerPosition * laneWidth * 0.8);
+                
+                this.playerCar.style.left = targetX + 'px';
+                this.playerCar.style.transform = 'translateX(-50%)';
+            }
+            
+            spawnGameObject() {
+                const now = Date.now();
+                if (now - this.lastSpawnTime < 1500) return;
+                
+                this.lastSpawnTime = now;
+                
+                // Randomly spawn coin or obstacle
+                const isCoin = Math.random() < 0.4;
+                const roadWidth = Math.min(window.innerWidth * 0.8, 400);
+                const laneWidth = roadWidth / 3;
+                const centerX = window.innerWidth / 2;
+                const lane = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+                const x = centerX + (lane * laneWidth * 0.8);
+                
+                if (isCoin) {
+                    this.createCoin(x);
+                } else {
+                    this.createObstacle(x);
+                }
+            }
+            
+            createCoin(x) {
+                const coin = document.createElement('img');
+                coin.src = 'https://buildwithmobile.lovestoblog.com/car/coin.gif';
+                coin.className = 'coin';
+                coin.style.left = x + 'px';
+                coin.style.top = '-50px';
+                coin.style.transform = 'translateX(-50%)';
+                
+                this.gameObjectContainer.appendChild(coin);
+                this.gameObjects.push({
+                    element: coin,
+                    type: 'coin',
+                    x: x,
+                    y: -50,
+                    lane: Math.round((x - window.innerWidth / 2) / (Math.min(window.innerWidth * 0.8, 400) / 3 * 0.8))
+                });
+            }
+            
+            createObstacle(x) {
+                const obstacleNum = Math.floor(Math.random() * 4) + 1;
+                const obstacle = document.createElement('img');
+                obstacle.src = `https://buildwithmobile.lovestoblog.com/car/obstacle${obstacleNum}.png`;
+                obstacle.className = 'obstacle';
+                obstacle.style.left = x + 'px';
+                obstacle.style.top = '-100px';
+                obstacle.style.transform = 'translateX(-50%)';
+                
+                this.gameObjectContainer.appendChild(obstacle);
+                this.gameObjects.push({
+                    element: obstacle,
+                    type: 'obstacle',
+                    x: x,
+                    y: -100,
+                    lane: Math.round((x - window.innerWidth / 2) / (Math.min(window.innerWidth * 0.8, 400) / 3 * 0.8))
+                });
+            }
+            
+            updateGameObjects() {
+                for (let i = this.gameObjects.length - 1; i >= 0; i--) {
+                    const obj = this.gameObjects[i];
+                    obj.y += this.gameSpeed + 3;
+                    obj.element.style.top = obj.y + 'px';
+                    
+                    // Check collision with player
+                    if (obj.lane === this.playerPosition && obj.y > window.innerHeight * 0.7 && obj.y < window.innerHeight * 0.9) {
+                        if (obj.type === 'coin') {
+                            this.collectCoin(i);
+                        } else {
+                            this.crash();
+                            return;
+                        }
+                    }
+                    
+                    // Remove off-screen objects
+                    if (obj.y > window.innerHeight + 100) {
+                        obj.element.remove();
+                        this.gameObjects.splice(i, 1);
+                    }
+                }
+            }
+            
+            collectCoin(index) {
+                const obj = this.gameObjects[index];
+                obj.element.remove();
+                this.gameObjects.splice(index, 1);
+                
+                this.score += 5;
+                this.updateScore();
+                
+                // Play coin sound
+                this.sounds.coin.currentTime = 0;
+                this.sounds.coin.play().catch(e => console.log('Audio play failed:', e));
+                
+                // Increase game speed slightly
+                this.gameSpeed += 0.05;
+            }
+            
+            crash() {
+                this.gameState = 'gameOver';
+                
+                // Stop background music and play crash sound
+                this.sounds.background.pause();
+                this.sounds.crash.currentTime = 0;
+                this.sounds.crash.play().catch(e => console.log('Audio play failed:', e));
+                
+                // Show game over screen after 2 seconds
+                setTimeout(() => {
+                    document.getElementById('finalScore').textContent = `Final Score: ${this.score}`;
+                    this.gameOverScreen.classList.remove('hidden');
+                }, 2000);
+                
+                // Clear game objects
+                this.gameObjects.forEach(obj => obj.element.remove());
+                this.gameObjects = [];
+            }
+            
+            updateScore() {
+                this.scoreBox.textContent = `Score: ${this.score}`;
+            }
+            
+            drawRoad() {
+                if (!this.roadImage.complete) return;
+                
+                this.roadOffset += this.gameSpeed;
+                if (this.roadOffset >= this.roadImage.height) {
+                    this.roadOffset = 0;
+                }
+                
+                // Draw road image with scrolling effect
+                const scale = Math.max(this.canvas.width / this.roadImage.width, this.canvas.height / this.roadImage.height);
+                const scaledWidth = this.roadImage.width * scale;
+                const scaledHeight = this.roadImage.height * scale;
+                const x = (this.canvas.width - scaledWidth) / 2;
+                
+                // Draw multiple copies for seamless scrolling
+                this.ctx.drawImage(this.roadImage, x, this.roadOffset - scaledHeight, scaledWidth, scaledHeight);
+                this.ctx.drawImage(this.roadImage, x, this.roadOffset, scaledWidth, scaledHeight);
+                this.ctx.drawImage(this.roadImage, x, this.roadOffset + scaledHeight, scaledWidth, scaledHeight);
+            }
+            
+            gameLoop() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (this.gameState === 'playing') {
+                    this.drawRoad();
+                    this.spawnGameObject();
+                    this.updateGameObjects();
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            new CarRacingGame();
+        });
+    </script>
 </body>
 </html>
